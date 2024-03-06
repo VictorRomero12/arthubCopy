@@ -13,7 +13,6 @@ class ProfilePage extends StatefulWidget {
   _ProfilePageState createState() => _ProfilePageState();
 }
 
-
 class _ProfilePageState extends State<ProfilePage> {
   late Future<Map<String, dynamic>> _profileData;
 
@@ -35,20 +34,15 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      // Convertir el username proporcionado a minúsculas
-      final String lowercaseUsername = widget.username.toLowerCase();
-      // Buscamos el perfil del usuario que inició sesión (ignorando mayúsculas/minúsculas)
-      final Map<String, dynamic>? profileData = data.firstWhere(
-        (profile) => profile['username'].toString().toLowerCase() == lowercaseUsername,
-        orElse: () => null,
-      );
+      // Buscamos el perfil del usuario que inició sesión
+      final Map<String, dynamic>? profileData = data.firstWhere((profile) => profile['username'] == widget.username, orElse: () => null);
       if (profileData != null) {
         return profileData;
       } else {
-        throw Exception('Perfil no encontrado');
+        throw Exception('Perfile no encontrado ');
       }
     } else {
-      throw Exception('Error al cargar los datos del perfil');
+      throw Exception('Failed to load profile data');
     }
   }
 
@@ -70,9 +64,8 @@ class _ProfilePageState extends State<ProfilePage> {
             // Obtenemos la fecha de nacimiento del perfil
             String fechaNacimientoString = profile['fechaNacimiento'];
             DateTime fechaNacimiento = DateTime.parse(fechaNacimientoString);
-            DateTime now= DateTime.now();
-            // Calculamos la edad en años
-            int edad = now.year - fechaNacimiento.year;
+            // Calculamos la edad
+            int edad = DateTime.now().year - fechaNacimiento.year;
             // Creamos un nuevo mapa con la información del perfil, incluyendo la edad
             Map<String, dynamic> profileWithAge = Map<String, dynamic>.from(profile);
             profileWithAge['edad'] = edad;
@@ -137,20 +130,20 @@ class ProfilePage1 extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       Center(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Redirigir al usuario a la pantalla de inicio de sesión
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (context) => LoginPage()),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.red, // Cambiar el color a rojo
-                          ),
-                          child: Text('Cerrar Sesión'),
-                        ),
-                      ),
+  child: ElevatedButton(
+    onPressed: () {
+      // Redirigir al usuario a la pantalla de inicio de sesión
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
+    },
+    style: ElevatedButton.styleFrom(
+      primary: Colors.red, // Cambiar el color a rojo
+    ),
+    child: Text('Cerrar Sesión'),
+  ),
+),
 
                     ],
                   ),
@@ -185,13 +178,13 @@ class _ProfileInfoList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<ProfileInfoItem> _items = [
-
+    
       ProfileInfoItem("Nombre", nombre),
       ProfileInfoItem("Apellidos", apellidos),
       ProfileInfoItem("Nombre de Usuario", userName),
       ProfileInfoItem("Correo", email),
       ProfileInfoItem("Edad", "$edad años"),
-
+      
     ];
 
     return Column(
@@ -302,3 +295,252 @@ class _TopPortion extends StatelessWidget {
     );
   }
 }
+
+class ZeroWidget extends StatelessWidget {
+  const ZeroWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ListTile(
+        leading: const CircleAvatar(
+          radius: 25,
+          backgroundColor: Colors.red,
+        ),
+        title: const Text("Add Drawer to a screen", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        subtitle: const Text("Design 1"),
+        trailing: const Icon(Icons.keyboard_arrow_right),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const MyZeroDart()),
+          );
+        },
+        dense: true,
+        selected: false,
+        enabled: true,
+      ),
+    );
+  }
+}
+
+class FirstWidget extends StatelessWidget {
+  const FirstWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ListTile(
+        leading: const CircleAvatar(
+          radius: 25,
+          backgroundColor: Colors.red,
+        ),
+        title: const Text("Display a snackbar", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        subtitle: const Text("Design 2"),
+        trailing: const Icon(Icons.keyboard_arrow_right),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SnackBarDemo()),
+          );
+        },
+        dense: true,
+        selected: false,
+        enabled: true,
+      ),
+    );
+  }
+}
+
+void main() => runApp(const MyZeroDart());
+
+class MyZeroDart extends StatelessWidget {
+  const MyZeroDart({Key? key}) : super(key: key);
+
+  static const appTitle = 'Drawer Demo';
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      title: appTitle,
+      home: MyHomePage(title: appTitle),
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
+
+  final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  int _selectedIndex = 0;
+  static const TextStyle optionStyle =
+      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+  static const List<Widget> _widgetOptions = <Widget>[
+    Text(
+      'Index 0: Home',
+      style: optionStyle,
+    ),
+    Text(
+      'Index 1: Business',
+      style: optionStyle,
+    ),
+    Text(
+      'Index 2: School',
+      style: optionStyle,
+    ),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.title)),
+      body: Center(
+        child: _widgetOptions[_selectedIndex],
+      ),
+      drawer: Drawer(
+        // Add a ListView to the drawer. This ensures the user can scroll
+        // through the options in the drawer if there isn't enough vertical
+        // space to fit everything.
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text('Drawer Header'),
+            ),
+            ListTile(
+              title: const Text('Home'),
+              selected: _selectedIndex == 0,
+              onTap: () {
+                // Update the state of the app
+                _onItemTapped(0);
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('Business'),
+              selected: _selectedIndex == 1,
+              onTap: () {
+                // Update the state of the app
+                _onItemTapped(1);
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('School'),
+              selected: _selectedIndex == 2,
+              onTap: () {
+                // Update the state of the app
+                _onItemTapped(2);
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DetailScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Detalle"),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            // Navegar de regreso al menú principal
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            // Navegar a la pantalla con el SnackBar
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SnackBarDemo()),
+            );
+          },
+          child: Text("Mostrar SnackBar"),
+        ),
+      ),
+    );
+  }
+}
+
+class SnackBarDemo extends StatelessWidget {
+  const SnackBarDemo({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'SnackBar Demo',
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('SnackBar Demo'),
+          // Agregar botón de regreso en la AppBar para volver al menú principal
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              // Navegar de regreso al menú principal
+              Navigator.pop(context);
+            },
+          ),
+        ),
+        body: const SnackBarPage(),
+      ),
+    );
+  }
+}
+
+class SnackBarPage extends StatelessWidget {
+  const SnackBarPage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ElevatedButton(
+        onPressed: () {
+          final snackBar = SnackBar(
+            content: const Text('Yay! A SnackBar!'),
+            action: SnackBarAction(
+              label: 'Undo',
+              onPressed: () {
+                // Some code to undo the change.
+              },
+            ),
+          );
+
+          // Find the ScaffoldMessenger in the widget tree
+          // and use it to show a SnackBar.
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        },
+        child: const Text('Show SnackBar'),
+      ),
+    );
+  }
+}
+
+

@@ -1,10 +1,10 @@
-import 'package:arthub/Cart/cart_page.dart';
-import 'package:arthub/profile/detail_profile.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:arthub/Cart/cart_page.dart';
+import 'package:arthub/Cart/order_page.dart';
+import 'package:arthub/profile/detail_profile.dart';
 
 class ApiDetailPage extends StatefulWidget {
   
@@ -26,9 +26,8 @@ class ApiDetailPage extends StatefulWidget {
   _ApiDetailPageState createState() => _ApiDetailPageState();
 }
 
-
 class _ApiDetailPageState extends State<ApiDetailPage> {
- String selectedFrame = 'Sin Marco';
+  String selectedFrame = 'Sin Marco';
   String selectedSize = 'Tamaño Predeterminado';
   String selectedPrintType = 'Tipo Predeterminado';
   bool isLiked = false;
@@ -39,7 +38,6 @@ class _ApiDetailPageState extends State<ApiDetailPage> {
     final response = await http.get(Uri.parse('http://arthub.somee.com/api/Publicacion'));
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      // Filtrar las publicaciones del artista específico
       final artistPublications = data.where((publication) => publication['nombreArtista'] == widget.artistName).toList();
       return {
         'authorName': widget.artistName,
@@ -50,6 +48,7 @@ class _ApiDetailPageState extends State<ApiDetailPage> {
       throw Exception('Failed to load artist profile');
     }
   }
+
   void _showLikeSnackBar() {
     final snackBar = const SnackBar(
       content: Text('Te gusta esta imagen'),
@@ -57,28 +56,58 @@ class _ApiDetailPageState extends State<ApiDetailPage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-void _openAuthorProfile() async {
-  // Almacenar el BuildContext antes de la llamada asíncrona
-  BuildContext? contextRef = context;
+  void _openAuthorProfile() async {
+    BuildContext? contextRef = context;
 
-  final artistProfileData = await fetchArtistProfile();
-  if (artistProfileData != null && contextRef != null) {
-    Navigator.push(
-      contextRef, // Usar el contexto almacenado
-      MaterialPageRoute(
-        builder: (_) => DetailProfile(
-          authorName: artistProfileData['authorName'],
-          totalPosts: artistProfileData['totalPosts'],
-          totalImages: artistProfileData['images'].length, // Agregar totalImages aquí
-          images: List<String>.from(artistProfileData['images']),
+    final artistProfileData = await fetchArtistProfile();
+    if (artistProfileData != null && contextRef != null) {
+      Navigator.push(
+        contextRef,
+        MaterialPageRoute(
+          builder: (_) => DetailProfile(
+            authorName: artistProfileData['authorName'],
+            totalPosts: artistProfileData['totalPosts'],
+            totalImages: artistProfileData['images'].length,
+            images: List<String>.from(artistProfileData['images']),
+          ),
         ),
-      ),
-    );
-  } else {
-    print('Failed to get artist profile data');
+      );
+    } else {
+      print('Failed to get artist profile data');
+    }
   }
+  void _showDeleteConfirmationDialog(Map<String, dynamic> item) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text('Confirmación'),
+        content: Text('¿Estás seguro de que deseas eliminar este artículo del carrito?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false); // Cancelar
+            },
+            child: Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(true); // Aceptar
+            },
+            child: Text('Aceptar'),
+          ),
+        ],
+      );
+    },
+  ).then((confirmed) {
+    if (confirmed != null && confirmed) {
+      _removeFromCart(item);
+    }
+  });
 }
-  _showFullScreenImage() {
+
+
+  void _showFullScreenImage() {
     showDialog(
       context: context,
       builder: (context) {
@@ -115,104 +144,157 @@ void _openAuthorProfile() async {
   }
 
   void _showCartDialog() {
-  showDialog(
-    context: context,
-    builder: (context) {
-      return Dialog(
-        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 60),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.grey),
-          ),
-          child: Consumer<CartModel>(
-            builder: (context, cart, child) {
-              return cart.items.isNotEmpty
-                  ? _buildCartItemInfo(cart)
-                  : _buildEmptyCartInfo();
-            },
-          ),
-        ),
-      );
-    },
-  );
-}
-
-Widget _buildCartItemInfo(CartModel cart) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    mainAxisSize: MainAxisSize.min,
-    children: cart.items.map((item) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Contenedor para la imagen
-              Container(
-                width: 100,
-                height: 100,
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          contentPadding: EdgeInsets.zero,
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          content: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: SingleChildScrollView(
+              child: Container(
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  image: DecorationImage(
-                    image: NetworkImage(item['imageUrl'] ?? ''),
-                    fit: BoxFit.cover,
-                  ),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color.fromARGB(255, 255, 255, 255)),
                 ),
-              ),
-              const SizedBox(width: 20), // Espaciado entre la imagen y la información
-
-              // Contenedor para la información del producto
-              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      'Nombre: ${item['name'] ?? ''}',
-                      style: const TextStyle(fontSize: 18),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Descripción: ${item['description'] ?? ''}',
-                      style: const TextStyle(fontSize: 18),
+                    Consumer<CartModel>(
+                      builder: (context, cart, child) {
+                        return cart.items.isNotEmpty
+                            ? _buildCartItemInfo(cart)
+                            : _buildEmptyCartInfo();
+                      },
                     ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Precio: \$${(item['price'] as double?)?.toStringAsFixed(2) ?? ''}',
-                      style: const TextStyle(fontSize: 18),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => OrderPage(cartItems: Provider.of<CartModel>(context, listen: false).items,
+                            frameType: selectedFrame,
+                            printType: selectedPrintType,
+                            size: selectedSize),
+                          ),
+                        );
+                      },
+                      child: Text('Comprar ahora'),
                     ),
                   ],
                 ),
               ),
-              IconButton(
-                icon: Icon(Icons.delete),
-                onPressed: () {
-                  _removeFromCart(item); // Método para eliminar el elemento del carrito
-                },
-              ),
-            ],
+            ),
           ),
-          const SizedBox(height: 20),
-        ],
+        );
+      },
+    );
+  }
+
+ Widget _buildCartItemInfo(CartModel cart) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: cart.items.map((item) {
+      return Container(
+        padding: EdgeInsets.all(10),
+        margin: EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                image: DecorationImage(
+                  image: NetworkImage(item['imageUrl'] ?? ''),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${item['name'] ?? ''}',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    '${item['description'] ?? ''}',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Precio: \$${(item['price'] as double?)?.toStringAsFixed(2) ?? ''}',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Tipo de marco: ${item['frameType'] ?? ''}',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Tipo de impresión: ${item['printType'] ?? ''}',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Tamaño: ${item['size'] ?? ''}',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.delete),
+              onPressed: () {
+                _showDeleteConfirmationDialog(item);
+              },
+            ),
+          ],
+        ),
       );
     }).toList(),
   );
 }
-void _removeFromCart(Map<String, dynamic> item) {
-  var cartModel = Provider.of<CartModel>(context, listen: false);
-  int index = cartModel.items.indexOf(item); // Encuentra el índice del artículo en la lista
-  if (index != -1) {
-    cartModel.removeItem(index); // Elimina el artículo basado en su índice
-    setState(() {
-      cartItemCount--;
-    });
+
+  void _removeFromCart(Map<String, dynamic> item) {
+    var cartModel = Provider.of<CartModel>(context, listen: false);
+    int index = cartModel.items.indexOf(item);
+    if (index != -1) {
+      cartModel.removeItem(index);
+      setState(() {
+        cartItemCount--;
+      });
+    }
   }
-}
-
-
-
 
   Widget _buildEmptyCartInfo() {
     return const Center(
@@ -222,273 +304,325 @@ void _removeFromCart(Map<String, dynamic> item) {
       ),
     );
   }
-
 void _addToCart() {
   double totalPrice = calculateTotalPrice();
   Map<String, dynamic> item = {
     'name': widget.name,
     'description': widget.description,
     'price': totalPrice,
-    'imageUrl': widget.imageUrl, // Agregar la URL de la imagen
-    // Otros detalles relevantes del artículo aquí...
+    'imageUrl': widget.imageUrl,
+    'frameType': selectedFrame,
+    'printType': selectedPrintType,
+    'size': selectedSize,
   };
 
-  // Acceder al CartModel utilizando Provider
+  var cartModel = Provider.of<CartModel>(context, listen: false);
+  
+  // Verificar si el producto ya está en el carrito
+  bool isAlreadyInCart = cartModel.items.any((cartItem) =>
+    cartItem['name'] == item['name'] &&
+    cartItem['imageUrl'] == item['imageUrl']
+  );
+
+  if (isAlreadyInCart) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Producto ya en el carrito'),
+          content: Text('Este producto ya está en tu carrito. ¿Deseas agregar otro?'),
+          actions: [
+            
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Aceptar'),
+            ),
+          ],
+        );
+      },
+    );
+  } 
+  else 
+  {
+    _addToCartConfirmed(item); // Solo agregar si el producto no está en el carrito
+  }
+}
+
+
+void _addToCartConfirmed(Map<String, dynamic> item) {
   Provider.of<CartModel>(context, listen: false).addItem(item);
 
   setState(() {
     cartItemCount++;
   });
 }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 55, 66, 103),
-        actions: [
-          Stack(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.shopping_cart),
-                onPressed: _showCartDialog,
-              ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: CircleAvatar(
-                  backgroundColor: Colors.red,
-                  radius: 10,
-                  child: Text(
-                    cartItemCount.toString(),
-                    style: const TextStyle(color: Colors.white),
-                  ),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: const Color.fromARGB(255, 55, 66, 103),
+          actions: [
+            Stack(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.shopping_cart, color: Color.fromARGB(255, 253, 192, 84)),
+                  onPressed: _showCartDialog,
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
-      backgroundColor: const Color.fromARGB(255, 38, 48, 63),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 64),
-        // Ajuste del margen inferior
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: GestureDetector(
-                onTap: _showFullScreenImage,
-                child: Hero(
-                  tag: 'imageTag',
-                  child: Container(
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.height / 3,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      image: DecorationImage(
-                        image: NetworkImage(widget.imageUrl),
-                        fit: BoxFit.cover,
+                if (cartItemCount > 0)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+        backgroundColor: const Color.fromARGB(255, 38, 48, 63),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 64),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: GestureDetector(
+                  onTap: _showFullScreenImage,
+                  child: Hero(
+                    tag: 'imageTag',
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height / 3,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        image: DecorationImage(
+                          image: NetworkImage(widget.imageUrl),
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '\$${calculateTotalPrice().toStringAsFixed(2)}',
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '\$${calculateTotalPrice().toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 253, 192, 84),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      isLiked ? Icons.favorite : Icons.favorite_border,
+                      color: Colors.red,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        isLiked = !isLiked;
+                        _showLikeSnackBar();
+                      });
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Center(
+                child: Text(
+                  widget.name,
                   style: const TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 253, 192, 84),
-                  ),
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 253, 192, 84)),
                 ),
-                IconButton(
-                  icon: Icon(
-                    isLiked ? Icons.favorite : Icons.favorite_border,
-                    color: Colors.red,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      isLiked = !isLiked;
-                      _showLikeSnackBar();
-                    });
-                  },
+              ),
+              const SizedBox(height: 10),
+              Center(
+                child: Text(
+                  widget.description,
+                  style: const TextStyle(
+                      fontSize: 22,
+                      color: Color.fromARGB(255, 253, 192, 84)),
                 ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Center(
-              child: Text(
-                widget.name,
-                style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 253, 192, 84)),
               ),
-            ),
-            const SizedBox(height: 10),
-            Center(
-              child: Text(
-                widget.description,
-                style: const TextStyle(
-                    fontSize: 22,
-                    color: Color.fromARGB(255, 253, 192, 84)),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: _openAuthorProfile,
+                    child: Row(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: const Color.fromARGB(255, 253, 192, 84),
+                            ),
+                          ),
+                          padding: const EdgeInsets.all(8),
+                          child: const Icon(
+                            Icons.account_circle,
+                            size: 40,
+                            color: Color.fromARGB(255, 253, 192, 84),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          widget.artistName,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            color: Color.fromARGB(255, 253, 192, 84),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: _openAuthorProfile,
+                    child: Text(
+                      widget.artistName,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        color: Color.fromARGB(255, 253, 192, 84),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 20),
-   Row(
-  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  children: [
-    GestureDetector(
-      onTap: _openAuthorProfile,
-      child: Row(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color.fromARGB(255, 253, 192, 84),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Tipo de Marco:',
+                    style: TextStyle(
+                      fontSize: 19,
+                      color: Colors.white,
+                    ),
+                  ),
+                  DropdownButton<String>(
+                    value: selectedFrame,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedFrame = value!;
+                      });
+                    },
+                    items: framePrices.keys.map((frame) {
+                      return DropdownMenuItem<String>(
+                        value: frame,
+                        child: Text(
+                          frame,
+                          style: TextStyle(
+                            color: const Color.fromARGB(255, 0, 0, 0),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
-            ),
-            padding: const EdgeInsets.all(8),
-            child: const Icon(
-              Icons.account_circle,
-              size: 40,
-              color: Color.fromARGB(255, 253, 192, 84),
-            ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Tamaño de la Imagen:',
+                    style: TextStyle(
+                      fontSize: 19,
+                      color: Colors.white,
+                    ),
+                  ),
+                  DropdownButton<String>(
+                    value: selectedSize,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedSize = value!;
+                      });
+                    },
+                    items: sizePrices.keys.map((size) {
+                      return DropdownMenuItem<String>(
+                        value: size,
+                        child: Text(
+                          size,
+                          style: TextStyle(
+                            color: const Color.fromARGB(255, 0, 0, 0),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Tipo de Impresión:',
+                    style: TextStyle(
+                      fontSize: 19,
+                      color: Colors.white,
+                    ),
+                  ),
+                  DropdownButton<String>(
+                    value: selectedPrintType,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedPrintType = value!;
+                      });
+                    },
+                    items: printTypePrices.keys.map((printType) {
+                      return DropdownMenuItem<String>(
+                        value: printType,
+                        child: Text(
+                          printType,
+                          style: TextStyle(
+                            color: const Color.fromARGB(255, 0, 0, 0),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ],
           ),
-          const SizedBox(width: 10),
-          Text(
-            widget.artistName,
-            style: const TextStyle(
-              fontSize: 20,
-              color: Color.fromARGB(255, 253, 192, 84),
-            ),
-          ),
-        ],
-      ),
-    ),
-    GestureDetector(
-      onTap: _openAuthorProfile,
-      child: Text(
-        widget.artistName,
-        style: const TextStyle(
-          fontSize: 20,
-          color: Color.fromARGB(255, 253, 192, 84),
         ),
-      ),
+       floatingActionButton: Padding(
+  padding: const EdgeInsets.only(bottom: 16.0), // Ajuste para ubicar el botón en la parte inferior de la pantalla
+  child: Align(
+    alignment: Alignment.bottomCenter,
+    child: FloatingActionButton.extended(
+      onPressed: _addToCart,
+      icon: const Icon(Icons.shopping_cart, color: Color.fromARGB(255, 38, 48, 63)),
+      label: const Text('Añadir al carrito'),
+      backgroundColor: const Color.fromARGB(255, 253, 192, 84),
     ),
-  ],
+  ),
 ),
 
 
 
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Tipo de Marco:',
-                  style: TextStyle(
-                    fontSize: 19,
-                    color: Color.fromARGB(255, 253, 192, 84),
-                  ),
-                ),
-                DropdownButton<String>(
-                  value: selectedFrame,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedFrame = value!;
-                    });
-                  },
-                  items: framePrices.keys.map((frame) {
-                    return DropdownMenuItem<String>(
-                      value: frame,
-                      child: Text(frame),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Tamaño de la Imagen:',
-                  style: TextStyle(
-                    fontSize: 19,
-                    color: Color.fromARGB(255, 253, 192, 84),
-                  ),
-                ),
-                DropdownButton<String>(
-                  value: selectedSize,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedSize = value!;
-                    });
-                  },
-                  items: sizePrices.keys.map((size) {
-                    return DropdownMenuItem<String>(
-                      value: size,
-                      child: Text(size),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Tipo de Impresión:',
-                  style: TextStyle(
-                    fontSize: 19,
-                    color: Color.fromARGB(255, 253, 192, 84),
-                  ),
-                ),
-                DropdownButton<String>(
-                  value: selectedPrintType,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedPrintType = value!;
-                    });
-                  },
-                  items: printTypePrices.keys.map((printType) {
-                    return DropdownMenuItem<String>(
-                      value: printType,
-                      child: Text(printType),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(
-            bottom: 48.0, left: 16.0, right: 16.0), // Padding para el botón
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          // Para alinear el botón al fondo de la pantalla
-          child: FloatingActionButton.extended(
-            onPressed: _addToCart,
-            icon: const Icon(Icons.shopping_cart,
-                color: Color.fromARGB(255, 38, 48, 63)),
-            label: const Text('Añadir al carrito'),
-            backgroundColor: const Color.fromARGB(255, 253, 192, 84),
-          ),
-        ),
       ),
     );
   }
 }
+
 final Map<String, double> framePrices = {
   'Sin Marco': 0.0,
   'Madera - \$10': 10.0,
@@ -513,3 +647,5 @@ final Map<String, double> printTypePrices = {
   'Impresion Laser - \$15': 15.0,
   'Impresion Fotografica - \$18': 18.0,
 };
+
+
