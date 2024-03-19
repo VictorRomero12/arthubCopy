@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:arthub/Home/Images_prueba.dart';
 import 'package:arthub/profile/main_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -140,7 +141,8 @@ class __FormContentState extends State<_FormContent> {
                 ),
                 onPressed: () async {
                   if (_formKey.currentState?.validate() ?? false) {
-                    final Uri url = Uri.parse('https://arthub.somee.com/api/v1/login');
+                    final Uri url =
+                        Uri.parse('https://arthub.somee.com/api/v1/login');
                     final response = await http.post(
                       url,
                       body: json.encode({
@@ -150,44 +152,50 @@ class __FormContentState extends State<_FormContent> {
                       headers: {'Content-Type': 'application/json'},
                     );
 
-                   if (response.statusCode == 200) {
-                    final int? userId = int.tryParse(response.body);
+                    if (response.statusCode == 200) {
+                      final int? userId = int.tryParse(response.body);
 
-                    if (userId != null) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => 
-      // HomeWidget()
-      SimpleBottomNavigation(
-         username: _email,
-              password: _password,
-
-      )
-      ),
-    );
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Credenciales inválidas')),
-    );
-  }
-} else if (response.statusCode == 400) {
-  final String errorMessage = response.body;
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(errorMessage)),
-  );
-} else {
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text('Error al conectar con el servidor')),
-  );
-}
-
+                      if (userId != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  // HomeWidget()
+                                  //SimpleBottomNavigation
+                                  //HomePagePrueba
+                                  HomePagePrueba(
+                                    username: _email,
+                                    password: _password,
+                                  )),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Credenciales inválidas')),
+                        );
+                      }
+                    } else if (response.statusCode == 400) {
+                      final String errorMessage = response.body;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(errorMessage)),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Error al conectar con el servidor')),
+                      );
+                    }
                   }
                 },
                 child: const Padding(
                   padding: EdgeInsets.all(10.0),
                   child: Text(
                     'Iniciar sesión',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'NerkoOne', color: Color.fromARGB(255, 55, 66, 103)),
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'NerkoOne',
+                        color: Color.fromARGB(255, 55, 66, 103)),
                   ),
                 ),
               ),
@@ -241,22 +249,27 @@ class _InputField extends StatelessWidget {
         prefixIcon: Icon(icon, color: const Color.fromARGB(255, 253, 192, 84)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20.0),
-          borderSide: const BorderSide(color: const Color.fromARGB(255, 253, 192, 84)),
+          borderSide:
+              const BorderSide(color: const Color.fromARGB(255, 253, 192, 84)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20.0),
-          borderSide: const BorderSide(color: const Color.fromARGB(255, 253, 192, 84)),
+          borderSide:
+              const BorderSide(color: const Color.fromARGB(255, 253, 192, 84)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20.0),
-          borderSide: const BorderSide(color: const Color.fromARGB(255, 253, 192, 84)),
+          borderSide:
+              const BorderSide(color: const Color.fromARGB(255, 253, 192, 84)),
         ),
-        labelStyle: const TextStyle(color: const Color.fromARGB(255, 253, 192, 84)),
-        hintStyle: const TextStyle(color: const Color.fromARGB(255, 253, 192, 84)),
+        labelStyle:
+            const TextStyle(color: const Color.fromARGB(255, 253, 192, 84)),
+        hintStyle:
+            const TextStyle(color: const Color.fromARGB(255, 253, 192, 84)),
       ),
       cursorColor: const Color.fromARGB(255, 253, 192, 84),
       onChanged: onChanged,
       validator: validator,
-);
-}
+    );
+  }
 }

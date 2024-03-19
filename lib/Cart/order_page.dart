@@ -35,80 +35,63 @@ class _OrderPageState extends State<OrderPage> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(10.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Text("Mi odern", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),),
+
               for (final item in widget.cartItems) ...[
                 Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
                     color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        spreadRadius: 1,
-                        blurRadius: 5,
-                        offset: Offset(0, 2),
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 3,
+                        blurRadius: 10,
+                        offset: Offset(0, 3),
                       ),
                     ],
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: ListTile(
-                      title: Text(
-                        item['name'] ?? '',
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 180,
+                        height: 100,
+                        child: Image.network(item['imageUrl'] ?? '', fit: BoxFit.cover,),
+                    // 
                       ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Text(
-                          //   item['description'] ?? '',
-                          //   style: TextStyle(fontSize: 18),
-                          // ),
-                          Text(
+                      Expanded(child: Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(item['name'] ?? '', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+                            Text(
                             'Marco: ${item['frameType'] ?? 'No especificado'}',
-                            style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+                            style: TextStyle(fontSize: 14, ),
                           ),
                           Text(
                             'Impresión: ${item['printType'] ?? 'No especificado'}',
-                            style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+                            style: TextStyle(fontSize: 14, ),
                           ),
                           Text(
                             'Tamaño: ${item['size'] ?? 'No especificado'}',
-                            style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+                            style: TextStyle(fontSize: 14, ),
                           ),
-                        ],
-                      ),
-                      trailing: Text(
+                          Text(
                         '\$${(item['price'] as double?)?.toStringAsFixed(2) ?? ''}',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.red),
                       ),
-                      leading: Container(
-                        width: 100,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              spreadRadius: 1,
-                              blurRadius: 5,
-                              offset: Offset(0, 2),
-                            ),
                           ],
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.network(
-                            item['imageUrl'] ?? '',
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    ),
+                      ))
+                    ],
+                    
                   ),
                 ),
                 SizedBox(height: 20),

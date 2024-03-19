@@ -4,12 +4,14 @@ class DetailProfile extends StatelessWidget {
   const DetailProfile({
     Key? key,
     required this.authorName,
+    required this.fotoPerfil,
     required this.totalPosts,
     required this.totalImages,
     required this.images,
   }) : super(key: key);
 
   final String authorName;
+  final String fotoPerfil;
   final int totalPosts;
   final int totalImages;
   final List<String> images;
@@ -52,17 +54,17 @@ class DetailProfile extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: CircleAvatar(
-                  radius: 40,
-                  backgroundColor: Colors.black,
-                  child: const Icon(
-                    Icons.account_circle,
-                    size: 80,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+  padding: const EdgeInsets.only(top: 20),
+  child: ClipOval(
+    child: Image.asset(
+      "assets/sinfoto.jpg",
+      fit: BoxFit.cover,
+      height: 100, // ajusta el tamaño de la imagen según tus necesidades
+      width: 100,
+    ),
+  ),
+),
+
             ],
           ),
           const SizedBox(height: 12),

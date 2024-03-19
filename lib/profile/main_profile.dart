@@ -85,7 +85,7 @@ class ProfilePage1 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String fotoPerfil= profileData['fotoPerfil'];
+    String fotoPerfil = profileData['fotoPerfil'];
     String nombre = profileData['nombre'];
     String apellidos = profileData['apellido'];
     String userName = profileData['username'];
@@ -93,64 +93,72 @@ class ProfilePage1 extends StatelessWidget {
     int edad = profileData['edad'];
 
     return Scaffold(
-      body: Column(
+      body: ListView(
         children: [
-          Expanded(
-            flex: 2,
-            child: _TopPortion(fotoPerfilUrl: fotoPerfil),
-          ),
-          Expanded(
-            flex: 3,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
+          Column(
+            children: [
+              Expanded(
+                flex: 2,
+                child: _TopPortion(fotoPerfilUrl: fotoPerfil),
+              ),
+              Expanded(
+                flex: 3,
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "$nombre $apellidos",
-                        style: Theme.of(context).textTheme.headline6?.copyWith(fontWeight: FontWeight.bold),
+                  child: Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "$nombre $apellidos",
+                            style: Theme.of(context)
+                                .textTheme
+                                .headline6
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          const Divider(),
+                          const SizedBox(height: 8),
+                          _ProfileInfoList(
+                            fotoPerfil: fotoPerfil,
+                            nombre: nombre,
+                            apellidos: apellidos,
+                            userName: userName,
+                            email: email,
+                            edad: edad,
+                          ),
+                          const SizedBox(height: 16),
+                          Center(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                // Redirigir al usuario a la pantalla de inicio de sesión
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => LoginPage()),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.red, // Cambiar el color a rojo
+                              ),
+                              child: Text('Cerrar Sesión'),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      const Divider(),
-                      const SizedBox(height: 8),
-                      _ProfileInfoList(
-                        fotoPerfil:fotoPerfil,
-                        nombre: nombre,
-                        apellidos: apellidos,
-                        userName: userName,
-                        email: email,
-                        edad: edad,
-                      ),
-                      const SizedBox(height: 16),
-                      Center(
-  child: ElevatedButton(
-    onPressed: () {
-      // Redirigir al usuario a la pantalla de inicio de sesión
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
-      );
-    },
-    style: ElevatedButton.styleFrom(
-      primary: Colors.red, // Cambiar el color a rojo
-    ),
-    child: Text('Cerrar Sesión'),
-  ),
-),
-
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
+          ZeroWidget(), // Agregar el widget ZeroWidget al final de la lista
         ],
       ),
     );
@@ -213,6 +221,7 @@ class _ProfileInfoList extends StatelessWidget {
             ),
           ),
         ],
+        
       ),
     );
   }

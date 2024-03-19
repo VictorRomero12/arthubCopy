@@ -3,15 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:arthub/Home/apidetail_prueba.dart';
 
+
 class ApiPage extends StatefulWidget {
+  
   @override
   _ApiPageState createState() => _ApiPageState();
 }
 
 class _ApiPageState extends State<ApiPage> {
   List<String> imageUrls = [];
-  late List<dynamic> jsonData; 
-  late List<dynamic> filteredData = []; 
+  List<dynamic>? jsonData;
+  List<dynamic> filteredData = [];
 
   @override
   void initState() {
@@ -28,9 +30,11 @@ class _ApiPageState extends State<ApiPage> {
 
       if (response.statusCode == 200) {
         setState(() {
-          jsonData = jsonDecode(response.body); 
-          filteredData = List.from(jsonData); 
-          imageUrls = jsonData.map<String>((json) => json['archivo']).toList();
+          jsonData = jsonDecode(response.body);
+          filteredData = List.from(jsonData!);
+          if (jsonData != null) {
+            imageUrls = jsonData!.map<String>((json) => json['archivo'] ?? '').toList();
+          }
         });
       } else {
         throw Exception('Failed to load images');
@@ -42,7 +46,9 @@ class _ApiPageState extends State<ApiPage> {
 
   void search(String query) {
     setState(() {
-      filteredData = jsonData.where((item) => item['titulo'].toString().toLowerCase().contains(query.toLowerCase())).toList();
+      if (jsonData != null) {
+        filteredData = jsonData!.where((item) => item['titulo'].toString().toLowerCase().contains(query.toLowerCase())).toList();
+      }
     });
   }
 
@@ -60,7 +66,7 @@ class _ApiPageState extends State<ApiPage> {
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
-              showSearch(context: context, delegate: CustomSearchDelegate(searchData: jsonData, imageUrls: imageUrls));
+              showSearch(context: context, delegate: CustomSearchDelegate(searchData: jsonData!, imageUrls: imageUrls));
             },
           ),
         ],
@@ -83,11 +89,12 @@ class _ApiPageState extends State<ApiPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => ApiDetailPage(
-                        imageUrl: filteredData[index]['archivo'],
-                        name: filteredData[index]['titulo'],
-                        description: filteredData[index]['descripcion'],
-                        randomPrice: filteredData[index]['precio'].toDouble(),
-                        artistName: filteredData[index]['nombreArtista'],
+                        imageUrl: filteredData[index]['archivo'] ?? '',
+                        name: filteredData[index]['titulo'] ?? '',
+                        description: filteredData[index]['descripcion'] ?? '',
+                        randomPrice: filteredData[index]['precio']?.toDouble() ?? 0.0,
+                        artistName: filteredData[index]['nombreArtista'] ?? '',
+                        fotoPerfil: filteredData[index]['fotoPerfil'] ?? '',
                       ),
                     ),
                   );
@@ -97,7 +104,7 @@ class _ApiPageState extends State<ApiPage> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: Image.network(
-                      filteredData[index]['archivo'],
+                      filteredData[index]['archivo'] ?? '',
                       fit: BoxFit.cover,
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) return child;
@@ -147,7 +154,7 @@ class CustomSearchDelegate extends SearchDelegate<String> {
 
   @override
   Widget buildResults(BuildContext context) {
-    return Container(); 
+    return Container();
   }
 
   @override
@@ -175,11 +182,12 @@ class CustomSearchDelegate extends SearchDelegate<String> {
               context,
               MaterialPageRoute(
                 builder: (context) => ApiDetailPage(
-                  imageUrl: item['archivo'],
-                  name: item['titulo'],
-                  description: item['descripcion'],
-                  randomPrice: item['precio'].toDouble(),
-                  artistName: item['nombreArtista'],
+                  imageUrl: item['archivo'] ?? '',
+                  name: item['titulo'] ?? '',
+                  description: item['descripcion'] ?? '',
+                  randomPrice: item['precio']?.toDouble() ?? 0.0,
+                  artistName: item['nombreArtista'] ?? '',
+                  fotoPerfil: item['fotoPerfil'] ?? '',
                 ),
               ),
             );
@@ -187,7 +195,7 @@ class CustomSearchDelegate extends SearchDelegate<String> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: Image.network(
-              item['archivo'],
+              item['archivo'] ?? '',
               fit: BoxFit.cover,
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) return child;

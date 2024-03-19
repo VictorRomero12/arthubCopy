@@ -7,12 +7,12 @@ import 'package:arthub/Cart/order_page.dart';
 import 'package:arthub/profile/detail_profile.dart';
 
 class ApiDetailPage extends StatefulWidget {
-  
   final String imageUrl;
   final String name;
   final String description;
   final double randomPrice;
   final String artistName;
+  final String fotoPerfil;
 
   ApiDetailPage({
     required this.imageUrl,
@@ -20,6 +20,7 @@ class ApiDetailPage extends StatefulWidget {
     required this.description,
     required this.randomPrice,
     required this.artistName,
+    required this.fotoPerfil,
   });
 
   @override
@@ -35,14 +36,21 @@ class _ApiDetailPageState extends State<ApiDetailPage> {
   int cartItemCount = 0;
 
   Future<Map<String, dynamic>?> fetchArtistProfile() async {
-    final response = await http.get(Uri.parse('http://arthub.somee.com/api/Publicacion'));
+    final response =
+        await http.get(Uri.parse('http://arthub.somee.com/api/Publicacion'));
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      final artistPublications = data.where((publication) => publication['nombreArtista'] == widget.artistName).toList();
+      final artistPublications = data
+          .where((publication) =>
+              publication['nombreArtista'] == widget.artistName)
+          .toList();
       return {
         'authorName': widget.artistName,
+        'fotoPerfil': widget.fotoPerfil,
         'totalPosts': artistPublications.length,
-        'images': artistPublications.map((publication) => publication['archivo']).toList(),
+        'images': artistPublications
+            .map((publication) => publication['archivo'])
+            .toList(),
       };
     } else {
       throw Exception('Failed to load artist profile');
@@ -61,51 +69,59 @@ class _ApiDetailPageState extends State<ApiDetailPage> {
 
     final artistProfileData = await fetchArtistProfile();
     if (artistProfileData != null && contextRef != null) {
-      Navigator.push(
-        contextRef,
-        MaterialPageRoute(
-          builder: (_) => DetailProfile(
-            authorName: artistProfileData['authorName'],
-            totalPosts: artistProfileData['totalPosts'],
-            totalImages: artistProfileData['images'].length,
-            images: List<String>.from(artistProfileData['images']),
+      if (widget.fotoPerfil != null) {
+        // Verificar si fotoPerfil no es null
+        Navigator.push(
+          contextRef,
+          MaterialPageRoute(
+            builder: (_) => DetailProfile(
+              authorName: artistProfileData['authorName'],
+              fotoPerfil:
+                  widget.fotoPerfil, // Solo usar fotoPerfil si no es null
+              totalPosts: artistProfileData['totalPosts'],
+              totalImages: artistProfileData['images'].length,
+              images: List<String>.from(artistProfileData['images']),
+            ),
           ),
-        ),
-      );
+        );
+      } else {
+        print('fotoPerfil es null');
+      }
     } else {
       print('Failed to get artist profile data');
     }
   }
-  void _showDeleteConfirmationDialog(Map<String, dynamic> item) {
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Text('Confirmación'),
-        content: Text('¿Estás seguro de que deseas eliminar este artículo del carrito?'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false); // Cancelar
-            },
-            child: Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(true); // Aceptar
-            },
-            child: Text('Aceptar'),
-          ),
-        ],
-      );
-    },
-  ).then((confirmed) {
-    if (confirmed != null && confirmed) {
-      _removeFromCart(item);
-    }
-  });
-}
 
+  void _showDeleteConfirmationDialog(Map<String, dynamic> item) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Confirmación'),
+          content: const Text(
+              '¿Estás seguro de que deseas eliminar este artículo del carrito?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false); // Cancelar
+              },
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true); // Aceptar
+              },
+              child: const Text('Aceptar'),
+            ),
+          ],
+        );
+      },
+    ).then((confirmed) {
+      if (confirmed != null && confirmed) {
+        _removeFromCart(item);
+      }
+    });
+  }
 
   void _showFullScreenImage() {
     showDialog(
@@ -160,7 +176,8 @@ class _ApiDetailPageState extends State<ApiDetailPage> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color.fromARGB(255, 255, 255, 255)),
+                  border: Border.all(
+                      color: const Color.fromARGB(255, 255, 255, 255)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,20 +201,23 @@ class _ApiDetailPageState extends State<ApiDetailPage> {
                             : _buildEmptyCartInfo();
                       },
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => OrderPage(cartItems: Provider.of<CartModel>(context, listen: false).items,
-                            frameType: selectedFrame,
-                            printType: selectedPrintType,
-                            size: selectedSize),
+                            builder: (context) => OrderPage(
+                                cartItems: Provider.of<CartModel>(context,
+                                        listen: false)
+                                    .items,
+                                frameType: selectedFrame,
+                                printType: selectedPrintType,
+                                size: selectedSize),
                           ),
                         );
                       },
-                      child: Text('Comprar ahora'),
+                      child: const Text('Comprar ahora'),
                     ),
                   ],
                 ),
@@ -209,81 +229,93 @@ class _ApiDetailPageState extends State<ApiDetailPage> {
     );
   }
 
- Widget _buildCartItemInfo(CartModel cart) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    mainAxisSize: MainAxisSize.min,
-    children: cart.items.map((item) {
-      return Container(
-        padding: EdgeInsets.all(10),
-        margin: EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                image: DecorationImage(
-                  image: NetworkImage(item['imageUrl'] ?? ''),
-                  fit: BoxFit.cover,
-                ),
+  Widget _buildCartItemInfo(CartModel cart) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: cart.items.map((item) {
+        return Container(
+          padding: const EdgeInsets.all(10),
+          margin: const EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 3,
+                blurRadius: 10,
+                offset: Offset(0, 3), 
+  
               ),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${item['name'] ?? ''}',
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    '${item['description'] ?? ''}',
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Precio: \$${(item['price'] as double?)?.toStringAsFixed(2) ?? ''}',
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Tipo de marco: ${item['frameType'] ?? ''}',
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Tipo de impresión: ${item['printType'] ?? ''}',
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Tamaño: ${item['size'] ?? ''}',
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                ],
+            ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 180,
+                height: 100,
+                // decoration: BoxDecoration(
+                //   borderRadius: BorderRadius.circular(10),
+                //   image: DecorationImage(
+                //     image: NetworkImage(item['imageUrl'] ?? ''),
+                //     fit: BoxFit.cover,
+                //   ),
+                // ),
+                child: Image.network(item['imageUrl'] ?? '', fit: BoxFit.cover,),
+                
+                
               ),
-            ),
-            IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () {
-                _showDeleteConfirmationDialog(item);
-              },
-            ),
-          ],
-        ),
-      );
-    }).toList(),
-  );
-}
+              
+              Expanded(
+                child: Padding(padding: EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${item['name'] ?? ''}',
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    
+                    
+                    
+                    Text(
+                      '\$${(item['price'] as double?)?.toStringAsFixed(2) ?? ''}',
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.red),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      '${item['frameType'] ?? ''}',
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      '${item['printType'] ?? ''}',
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      '${item['size'] ?? ''}',
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                  ],
+                ),),
+                
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () {
+                  _showDeleteConfirmationDialog(item);
+                },
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
 
   void _removeFromCart(Map<String, dynamic> item) {
     var cartModel = Provider.of<CartModel>(context, listen: false);
@@ -304,60 +336,136 @@ class _ApiDetailPageState extends State<ApiDetailPage> {
       ),
     );
   }
-void _addToCart() {
-  double totalPrice = calculateTotalPrice();
-  Map<String, dynamic> item = {
-    'name': widget.name,
-    'description': widget.description,
-    'price': totalPrice,
-    'imageUrl': widget.imageUrl,
-    'frameType': selectedFrame,
-    'printType': selectedPrintType,
-    'size': selectedSize,
-  };
 
-  var cartModel = Provider.of<CartModel>(context, listen: false);
-  
-  // Verificar si el producto ya está en el carrito
-  bool isAlreadyInCart = cartModel.items.any((cartItem) =>
-    cartItem['name'] == item['name'] &&
-    cartItem['imageUrl'] == item['imageUrl']
+  void _addToCart() {
+    double totalPrice = calculateTotalPrice();
+    Map<String, dynamic> item = {
+      'name': widget.name,
+      'description': widget.description,
+      'price': totalPrice,
+      'imageUrl': widget.imageUrl,
+      'frameType': selectedFrame,
+      'printType': selectedPrintType,
+      'size': selectedSize,
+    };
+
+    var cartModel = Provider.of<CartModel>(context, listen: false);
+
+    // Verificar si el producto ya está en el carrito
+    bool isAlreadyInCart = cartModel.items.any((cartItem) =>
+        cartItem['name'] == item['name'] &&
+        cartItem['0imageUrl'] == item['imageUrl']);
+
+    if (isAlreadyInCart) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Producto ya en el carrito'),
+            content: const Text(
+                'Este producto ya está en tu carrito. ¿Deseas agregar otro?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Aceptar'),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      _addToCartConfirmed(
+          item); // Solo agregar si el producto no está en el carrito
+    }
+  }
+
+  void _addToCartConfirmed(Map<String, dynamic> item) {
+    Provider.of<CartModel>(context, listen: false).addItem(item);
+
+    setState(() {
+      cartItemCount++;
+    });
+  }
+
+void _buildFullScreenImage() {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return Dialog(
+        child: GestureDetector(
+          onTap: () {
+            Navigator.of(context).pop();
+          },
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Imagen principal (galería)
+              Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(widget.imageUrl),
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+              // Superponer las imágenes de los marcos
+              if (selectedFrame != 'Sin Marco')
+                Image.asset(
+                  'assets/${selectedFrame.toLowerCase()}.png',
+                  width: double.infinity,
+                  height: double.infinity,
+                  fit: BoxFit.contain,
+                ),
+            ],
+          ),
+        ),
+      );
+    },
   );
+}
 
-  if (isAlreadyInCart) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Producto ya en el carrito'),
-          content: Text('Este producto ya está en tu carrito. ¿Deseas agregar otro?'),
-          actions: [
-            
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Aceptar'),
-            ),
-          ],
-        );
-      },
-    );
-  } 
-  else 
-  {
-    _addToCartConfirmed(item); // Solo agregar si el producto no está en el carrito
+
+Widget _buildFrameImage() {
+  switch (selectedFrame) {
+    case 'Sin Marco':
+      return SizedBox.shrink(); // No mostrar ninguna imagen si no hay marco
+    case 'Madera':
+      return Image.asset(
+        'assets/madera.webp',
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.contain,
+      );
+    case 'Metal':
+      return Image.asset(
+        'assets/cobre.png',
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.contain,
+      );
+    case 'Aluminio':
+      return Image.asset(
+        'assets/aluminio.png',
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.contain,
+      );
+    case 'Plastico':
+      return Image.asset(
+        'assets/plastico.png',
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.contain,
+      );
+    default:
+      return SizedBox.shrink(); // No mostrar ninguna imagen por defecto
   }
 }
 
-
-void _addToCartConfirmed(Map<String, dynamic> item) {
-  Provider.of<CartModel>(context, listen: false).addItem(item);
-
-  setState(() {
-    cartItemCount++;
-  });
-}
 
   @override
   Widget build(BuildContext context) {
@@ -369,7 +477,8 @@ void _addToCartConfirmed(Map<String, dynamic> item) {
             Stack(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.shopping_cart, color: Color.fromARGB(255, 253, 192, 84)),
+                  icon: const Icon(Icons.shopping_cart,
+                      color: Color.fromARGB(255, 253, 192, 84)),
                   onPressed: _showCartDialog,
                 ),
                 if (cartItemCount > 0)
@@ -379,7 +488,7 @@ void _addToCartConfirmed(Map<String, dynamic> item) {
                     child: Container(
                       width: 10,
                       height: 10,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: Colors.red,
                         shape: BoxShape.circle,
                       ),
@@ -455,8 +564,7 @@ void _addToCartConfirmed(Map<String, dynamic> item) {
                 child: Text(
                   widget.description,
                   style: const TextStyle(
-                      fontSize: 22,
-                      color: Color.fromARGB(255, 253, 192, 84)),
+                      fontSize: 22, color: Color.fromARGB(255, 253, 192, 84)),
                 ),
               ),
               const SizedBox(height: 20),
@@ -467,18 +575,17 @@ void _addToCartConfirmed(Map<String, dynamic> item) {
                     onTap: _openAuthorProfile,
                     child: Row(
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: const Color.fromARGB(255, 253, 192, 84),
+                        ClipOval(
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            child: Image.asset(
+                              'assets/sinfoto.jpg',
+                              fit: BoxFit.cover,
+                              width:
+                                  50, // Ajusta el tamaño de la imagen según sea necesario
+                              height:
+                                  50, // Ajusta el tamaño de la imagen según sea necesario
                             ),
-                          ),
-                          padding: const EdgeInsets.all(8),
-                          child: const Icon(
-                            Icons.account_circle,
-                            size: 40,
-                            color: Color.fromARGB(255, 253, 192, 84),
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -527,8 +634,8 @@ void _addToCartConfirmed(Map<String, dynamic> item) {
                         value: frame,
                         child: Text(
                           frame,
-                          style: TextStyle(
-                            color: const Color.fromARGB(255, 0, 0, 0),
+                          style: const TextStyle(
+                            color: Color.fromARGB(255, 0, 0, 0),
                           ),
                         ),
                       );
@@ -559,8 +666,8 @@ void _addToCartConfirmed(Map<String, dynamic> item) {
                         value: size,
                         child: Text(
                           size,
-                          style: TextStyle(
-                            color: const Color.fromARGB(255, 0, 0, 0),
+                          style: const TextStyle(
+                            color: Color.fromARGB(255, 0, 0, 0),
                           ),
                         ),
                       );
@@ -591,8 +698,8 @@ void _addToCartConfirmed(Map<String, dynamic> item) {
                         value: printType,
                         child: Text(
                           printType,
-                          style: TextStyle(
-                            color: const Color.fromARGB(255, 0, 0, 0),
+                          style: const TextStyle(
+                            color: Color.fromARGB(255, 0, 0, 0),
                           ),
                         ),
                       );
@@ -603,21 +710,34 @@ void _addToCartConfirmed(Map<String, dynamic> item) {
             ],
           ),
         ),
-       floatingActionButton: Padding(
-  padding: const EdgeInsets.only(bottom: 16.0), // Ajuste para ubicar el botón en la parte inferior de la pantalla
-  child: Align(
-    alignment: Alignment.bottomCenter,
-    child: FloatingActionButton.extended(
-      onPressed: _addToCart,
-      icon: const Icon(Icons.shopping_cart, color: Color.fromARGB(255, 38, 48, 63)),
-      label: const Text('Añadir al carrito'),
-      backgroundColor: const Color.fromARGB(255, 253, 192, 84),
-    ),
-  ),
-),
-
-
-
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.only(
+              bottom:
+                  16.0), // Ajuste para ubicar el botón en la parte inferior de la pantalla
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FloatingActionButton.extended(
+                  onPressed: _addToCart,
+                  icon: const Icon(Icons.shopping_cart,
+                      color: Color.fromARGB(255, 38, 48, 63)),
+                  label: const Text('Añadir al carrito'),
+                  backgroundColor: const Color.fromARGB(255, 253, 192, 84),
+                ),
+                const SizedBox(height: 16), // Espacio entre los botones
+                FloatingActionButton.extended(
+                  onPressed: _buildFullScreenImage,
+                  icon: const Icon(Icons.fullscreen,
+                      color: Color.fromARGB(255, 38, 48, 63)),
+                  label: const Text('Mostrar Pantalla Completa'),
+                  backgroundColor: const Color.fromARGB(255, 253, 192, 84),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -647,5 +767,3 @@ final Map<String, double> printTypePrices = {
   'Impresion Laser - \$15': 15.0,
   'Impresion Fotografica - \$18': 18.0,
 };
-
-

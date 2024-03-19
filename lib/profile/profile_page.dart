@@ -104,7 +104,7 @@ class ProfilePage1 extends StatelessWidget {
         children: [
           Expanded(
             flex: 2,
-            child: _TopPortion(fotoPerfilUrl: fotoPerfil),
+            child: _TopPortion(fotoPerfil: fotoPerfil),
           ),
           Expanded(
             flex: 3,
@@ -233,9 +233,9 @@ class ProfileInfoItem {
 
 
 class _TopPortion extends StatelessWidget {
-  final String fotoPerfilUrl;
+  final String fotoPerfil;
 
-  const _TopPortion({Key? key, required this.fotoPerfilUrl}) : super(key: key);
+  const _TopPortion({Key? key, required this.fotoPerfil}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -264,7 +264,7 @@ class _TopPortion extends StatelessWidget {
               children: [
                 ClipOval(
                   child: Image.network(
-                    fotoPerfilUrl,
+                    fotoPerfil,
                     fit: BoxFit.cover,
                     loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
                       if (loadingProgress == null) {
