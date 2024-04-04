@@ -1,3 +1,4 @@
+import 'package:arthub/authentication/carousel_inicio.dart';
 import 'package:arthub/authentication/login_page.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -38,7 +39,7 @@ class _AnimacionInicioState extends State<AnimacionInicio> {
           Visibility(
             visible: !_showLogo,
             child: Positioned.fill(
-              child: LoginPage(),
+              child: CarouselInicio(),
             ),
           ),
         ],

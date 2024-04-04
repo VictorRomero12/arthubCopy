@@ -1,6 +1,7 @@
 import 'package:arthub/Home/NewDetailPage.dart';
 import 'package:arthub/Home/Widgets/DrawerWidget.dart';
 import 'package:arthub/Home/apidetail_prueba.dart';
+import 'package:arthub/Home/otraPrueba.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -9,8 +10,14 @@ import 'dart:convert';
 class HomePagePrueba extends StatefulWidget {
   final String username;
   final String password;
+  final int idUsuario;
 
-  const HomePagePrueba({Key? key, required this.username, required this.password}) : super(key: key);
+  const HomePagePrueba(
+      {Key? key,
+      required this.username,
+      required this.password,
+      required this.idUsuario})
+      : super(key: key);
 
   @override
   _HomePagePruebaState createState() => _HomePagePruebaState();
@@ -24,11 +31,13 @@ class _HomePagePruebaState extends State<HomePagePrueba> {
   @override
   void initState() {
     super.initState();
+
     _fetchImages();
   }
 
   Future<void> _fetchImages() async {
-    final response = await http.get(Uri.parse('http://arthub.somee.com/api/Publicacion'));
+    final response =
+        await http.get(Uri.parse('http://arthub.somee.com/api/Publicacion'));
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
       setState(() {
@@ -48,15 +57,19 @@ class _HomePagePruebaState extends State<HomePagePrueba> {
   void _filterImages(String searchTerm) {
     setState(() {
       _searchTerm = searchTerm.toLowerCase();
-      _filteredImages = _allImages.where((image) => image['titulo'].toLowerCase().contains(_searchTerm)).toList();
+      _filteredImages = _allImages
+          .where((image) => image['titulo'].toLowerCase().contains(_searchTerm))
+          .toList();
       _shuffleImages();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    print('ID del usuario en HomePagePrueba: ${widget.idUsuario}');
     return Scaffold(
-      appBar: AppBar(), // Coloca aquí el AppBarWidget
+      backgroundColor: const Color.fromARGB(255, 55, 66, 103),
+      // Coloca aquí el AppBarWidget
 
       body: RefreshIndicator(
         onRefresh: () async {
@@ -65,7 +78,7 @@ class _HomePagePruebaState extends State<HomePagePrueba> {
         child: ListView(
           children: [
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
               child: Container(
                 width: double.infinity,
                 height: 50,
@@ -77,16 +90,16 @@ class _HomePagePruebaState extends State<HomePagePrueba> {
                         color: Colors.grey.withOpacity(0.5),
                         spreadRadius: 2,
                         blurRadius: 10,
-                        offset: Offset(0, 3),
+                        offset: const Offset(0, 3),
                       )
                     ]),
                 child: Padding(
-                  padding: EdgeInsets.symmetric(
+                  padding: const EdgeInsets.symmetric(
                     horizontal: 10,
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         CupertinoIcons.search,
                         color: Colors.red,
                       ),
@@ -94,44 +107,27 @@ class _HomePagePruebaState extends State<HomePagePrueba> {
                         height: 50,
                         width: 300,
                         child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 15),
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
                           child: TextFormField(
                             onChanged: (value) {
                               _filterImages(value);
                             },
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               hintText: "Search...",
                               border: InputBorder.none,
                             ),
                           ),
                         ),
                       ),
-                      Icon(Icons.filter_list)
                     ],
                   ),
                 ),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.only(top: 20, left: 10),
-              child: Text(
-                "Categories",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-              ),
-            ),
-            CategoriesWidget(),
-            Padding(
-              padding: EdgeInsets.only(top: 20, left: 10),
-              child: Text(
-                "Popular",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-              ),
-            ),
-            ApiPage(images: _filteredImages),
+            ApiPage(images: _allImages, idUsuario: widget.idUsuario),
           ],
         ),
       ),
-      drawer: DrawerWidget(),
     );
   }
 }
@@ -145,39 +141,46 @@ class CategoriesWidget extends StatelessWidget {
 
 class ApiPage extends StatelessWidget {
   final List<dynamic> images;
+  final int idUsuario; // Agrega el campo idUsuario como parte de la clase
 
-  ApiPage({required this.images});
+  ApiPage(
+      {required this.images,
+      required this.idUsuario}); // Actualiza el constructor
 
   @override
   Widget build(BuildContext context) {
     final bool isImageListEmpty = images.isEmpty;
     return isImageListEmpty
-        ? Center(child: CircularProgressIndicator())
+        ? const Center(child: CircularProgressIndicator())
         : Padding(
             padding: const EdgeInsets.all(8.0),
             child: GridView.builder(
               shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                crossAxisSpacing: 8.0,
-                mainAxisSpacing: 8.0,
               ),
               itemCount: images.length,
               itemBuilder: (BuildContext context, int index) {
                 final dynamic item = images[index];
                 return GestureDetector(
                   onTap: () {
+                    final int publicationId =
+                        item['idPublicacion'] as int? ?? 0;
+                    print(
+                        'Usuario: ${idUsuario} abriendo la imagen con ID de publicación: $publicationId');
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ApiDetailPage2(
+                        builder: (context) => ApiDetailPage3(
                           imageUrl: item['archivo'] ?? '',
                           name: item['titulo'] ?? '',
                           description: item['descripcion'] ?? '',
                           randomPrice: item['precio']?.toDouble() ?? 0.0,
                           artistName: item['nombreArtista'] ?? '',
                           fotoPerfil: item['fotoPerfil'] ?? '',
+                          idUsuario: idUsuario, // Usa widget.idUsuario aquí
+                          publicationId: publicationId,
                         ),
                       ),
                     );
@@ -187,12 +190,11 @@ class ApiPage extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                      ),
+                    child: SizedBox(
+                      height: 200,
                       child: ClipRRect(
-                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8.0)),
                         child: Image.network(
                           images[index]['archivo'],
                           fit: BoxFit.cover,
@@ -206,60 +208,3 @@ class ApiPage extends StatelessWidget {
           );
   }
 }
-
-class AppBarWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: 15,
-        horizontal: 15,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          InkWell(
-            onTap: () {
-              Scaffold.of(context).openDrawer();
-            },
-            child: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 2,
-                    blurRadius: 10,
-                    offset: Offset(0, 3),
-                  )
-                ],
-              ),
-              child: Icon(CupertinoIcons.bars),
-            ),
-          ),
-          InkWell(
-            child: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 2,
-                    blurRadius: 10,
-                    offset: Offset(0, 3),
-                  )
-                ],
-              ),
-              child: Icon(Icons.notifications),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-}
-

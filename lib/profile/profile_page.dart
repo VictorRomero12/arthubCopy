@@ -103,7 +103,7 @@ class ProfilePage1 extends StatelessWidget {
       body: Column(
         children: [
           Expanded(
-            flex: 2,
+            
             child: _TopPortion(fotoPerfil: fotoPerfil),
           ),
           Expanded(
@@ -142,7 +142,7 @@ class ProfilePage1 extends StatelessWidget {
                             // Redirigir al usuario a la pantalla de inicio de sesión
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => LoginPage()),
+                              MaterialPageRoute(builder: (context) => LoginPageModal()),
                             );
                           },
                           style: ElevatedButton.styleFrom(
@@ -242,20 +242,9 @@ class _TopPortion extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Container(
-          margin: const EdgeInsets.only(bottom: 50),
-          decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [Color(0xff0043ba), Color(0xff006df1)]),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(50),
-                bottomRight: Radius.circular(50),
-              )),
-        ),
+        
         Align(
-          alignment: Alignment.bottomCenter,
+          alignment: Alignment.topCenter,
           child: SizedBox(
             width: 150,
             height: 150,

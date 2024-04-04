@@ -29,21 +29,28 @@ class ApiDetailPage2 extends StatefulWidget {
 }
 
 class _ApiDetailPageState extends State<ApiDetailPage2> {
-   Future<Map<String, dynamic>?> fetchArtistProfile() async {
-    final response = await http.get(Uri.parse('http://arthub.somee.com/api/Publicacion'));
+  Future<Map<String, dynamic>?> fetchArtistProfile() async {
+    final response =
+        await http.get(Uri.parse('http://arthub.somee.com/api/Publicacion'));
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      final artistPublications = data.where((publication) => publication['nombreArtista'] == widget.artistName).toList();
+      final artistPublications = data
+          .where((publication) =>
+              publication['nombreArtista'] == widget.artistName)
+          .toList();
       return {
         'authorName': widget.artistName,
         'fotoPerfil': widget.fotoPerfil,
         'totalPosts': artistPublications.length,
-        'images': artistPublications.map((publication) => publication['archivo']).toList(),
+        'images': artistPublications
+            .map((publication) => publication['archivo'])
+            .toList(),
       };
     } else {
       throw Exception('Failed to load artist profile');
     }
   }
+
   String selectedFrame = 'Sin Marco';
   String selectedSize = 'Tamaño Predeterminado';
   String selectedPrintType = 'Tipo Predeterminado';
@@ -77,8 +84,10 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
   };
 
   double calculateTotalPrice() {
-    double totalPrice =
-        sizePrices[selectedSize]! + framePrices[selectedFrame]! + printTypePrices[selectedPrintType]! + widget.randomPrice;
+    double totalPrice = sizePrices[selectedSize]! +
+        framePrices[selectedFrame]! +
+        printTypePrices[selectedPrintType]! +
+        widget.randomPrice;
     return totalPrice;
   }
 
@@ -133,6 +142,7 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
       print('Failed to get artist profile data');
     }
   }
+
   void _showDeleteConfirmationDialog(Map<String, dynamic> item) {
     showDialog(
       context: context,
@@ -188,6 +198,7 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
       },
     );
   }
+
   void _showCartDialog() {
     showDialog(
       context: context,
@@ -260,6 +271,7 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
 
   Widget _buildCartItemInfo(CartModel cart) {
     return Column(
+      
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: cart.items.map((item) {
@@ -274,8 +286,7 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
                 color: Colors.grey.withOpacity(0.5),
                 spreadRadius: 3,
                 blurRadius: 10,
-                offset: Offset(0, 3), 
-  
+                offset: Offset(0, 3),
               ),
             ],
           ),
@@ -283,53 +294,54 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-  width: 180,
-  height: 180,
-  decoration: BoxDecoration(
-    borderRadius: BorderRadius.circular(10),
-    image: DecorationImage(
-      image: NetworkImage(item['imageUrl'] ?? ''),
-      fit: BoxFit.contain, // Usar BoxFit.contain para mostrar la imagen completa
-    ),
-  ),
-),
-
-              
+                width: 180,
+                height: 180,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  image: DecorationImage(
+                    image: NetworkImage(item['imageUrl'] ?? ''),
+                    fit: BoxFit
+                        .contain, // Usar BoxFit.contain para mostrar la imagen completa
+                  ),
+                ),
+              ),
               Expanded(
-                child: Padding(padding: EdgeInsets.all(10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '${item['name'] ?? ''}',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    
-                    
-                    
-                    Text(
-                      '\$${(item['price'] as double?)?.toStringAsFixed(2) ?? ''}',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.red),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      '${item['frameType'] ?? ''}',
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      '${item['printType'] ?? ''}',
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      '${item['size'] ?? ''}',
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                  ],
-                ),),
-                
+                child: Padding(
+                  padding: EdgeInsets.all(10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${item['name'] ?? ''}',
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        '\$${(item['price'] as double?)?.toStringAsFixed(2) ?? ''}',
+                        style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        '${item['frameType'] ?? ''}',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        '${item['printType'] ?? ''}',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        '${item['size'] ?? ''}',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ],
+                  ),
+                ),
               ),
               IconButton(
                 icon: const Icon(Icons.delete),
@@ -416,43 +428,43 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 55, 66, 103),
       appBar: AppBar(
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back),
-        onPressed: () {
-          Navigator.pop(context);
-        },
-      ),
-      actions: [
-        Stack(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.shopping_cart,
-                      color: Color.fromARGB(255, 253, 192, 84)),
-                  onPressed: _showCartDialog,
-                ),
-                if (cartItemCount > 0)
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      width: 10,
-                      height: 10,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
+        backgroundColor: Color.fromARGB(255, 47, 60, 79),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 255, 178, 63),),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        actions: [
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(CupertinoIcons.cart_fill, color:  Color.fromARGB(255, 255, 178, 63)),
+                onPressed: _showCartDialog,
+              ),
+              if (cartItemCount > 0)
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
                     ),
                   ),
-              ],
-            ),
-      ],
-      title: Text('Detalle de Producto'),
-    ),
+                ),
+            ],
+          ),
+        ],
+        title: Text('Detalle de la Imagen', style: TextStyle(color:  Color.fromARGB(255, 255, 178, 63)),),
+      ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -478,7 +490,7 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
                     style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: Colors.red,
+                      color: Color.fromARGB(255, 255, 178, 63),
                     ),
                   ),
                 ),
@@ -487,7 +499,7 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
                   child: IconButton(
                     icon: Icon(
                       isLiked ? Icons.favorite : Icons.favorite_border,
-                      color: Colors.red,
+                      color: Color.fromARGB(255, 255, 178, 63),
                     ),
                     onPressed: () {
                       setState(() {
@@ -508,7 +520,7 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: Color.fromARGB(255, 255, 255, 255),
                   ),
                 ),
               ),
@@ -520,6 +532,7 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
                 widget.description,
                 style: const TextStyle(
                   fontSize: 16,
+                  color: Colors.white
                 ),
               ),
             ),
@@ -546,7 +559,7 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
                       widget.artistName,
                       style: const TextStyle(
                         fontSize: 18,
-                        color: Colors.black,
+                        color: Color.fromARGB(255, 255, 255, 255),
                       ),
                     ),
                   ],
@@ -558,7 +571,8 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
               "Opciones de tamaño",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 20,
+                fontSize: 20, 
+                color: Colors.white
               ),
               textAlign: TextAlign.center,
             ),
@@ -581,15 +595,15 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
                       },
                       style: ElevatedButton.styleFrom(
                         primary: selectedSize == sizeOption
-                            ? Colors.red
+                            ? Color.fromARGB(255, 255, 178, 63)
                             : Colors.white,
                         onPrimary: selectedSize == sizeOption
-                            ? Colors.white
-                            : Colors.black,
-                        side: BorderSide(
-                          color: Colors.red,
-                          width: 2,
-                        ),
+                            ? Color.fromARGB(255, 55, 66, 103)
+                            : Color.fromARGB(255, 55, 66, 103),
+                        // side: BorderSide(
+                        //   color: Color.fromARGB(255, 255, 178, 63),
+                        //   width: 2,
+                        // ),
                       ),
                       child: Text(
                         sizeOption,
@@ -608,6 +622,7 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
+                color: Colors.white
               ),
               textAlign: TextAlign.center,
             ),
@@ -630,15 +645,15 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
                       },
                       style: ElevatedButton.styleFrom(
                         primary: selectedFrame == frameOption
-                            ? Colors.red
+                            ? Color.fromARGB(255, 255, 178, 63)
                             : Colors.white,
                         onPrimary: selectedFrame == frameOption
-                            ? Colors.white
-                            : Colors.black,
-                        side: BorderSide(
-                          color: Colors.red,
-                          width: 2,
-                        ),
+                            ? Color.fromARGB(255, 55, 66, 103)
+                            : Color.fromARGB(255, 55, 66, 103),
+                        // side: BorderSide(
+                        //   color: Color.fromARGB(255, 255, 178, 63),
+                        //   width: 2,
+                        // ),
                       ),
                       child: Text(
                         frameOption,
@@ -657,6 +672,7 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
+                color: Colors.white
               ),
               textAlign: TextAlign.center,
             ),
@@ -672,22 +688,23 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
                     return const SizedBox(width: 15);
                   },
                   itemBuilder: (BuildContext context, int index) {
-                    String printTypeOption = printTypePrices.keys.toList()[index];
+                    String printTypeOption =
+                        printTypePrices.keys.toList()[index];
                     return ElevatedButton(
                       onPressed: () {
                         _updateSelectedPrintType(printTypeOption);
                       },
                       style: ElevatedButton.styleFrom(
                         primary: selectedPrintType == printTypeOption
-                            ? Colors.red
+                            ? Color.fromARGB(255, 255, 178, 63)
                             : Colors.white,
                         onPrimary: selectedPrintType == printTypeOption
-                            ? Colors.white
-                            : Colors.black,
-                        side: BorderSide(
-                          color: Colors.red,
-                          width: 2,
-                        ),
+                            ? Color.fromARGB(255, 55, 66, 103)
+                            : Color.fromARGB(255, 55, 66, 103),
+                        // side: BorderSide(
+                        //   color: Color.fromARGB(255, 255, 178, 63),
+                        //   width: 2,
+                        // ),
                       ),
                       child: Text(
                         printTypeOption,
@@ -703,7 +720,10 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
           ],
         ),
       ),
-      bottomNavigationBar: ItemBottomNarbar(totalPrice: calculateTotalPrice(), onAddToCartPressed: _addToCart,),
+      bottomNavigationBar: ItemBottomNarbar(
+        totalPrice: calculateTotalPrice(),
+        onAddToCartPressed: _addToCart,
+      ),
     );
   }
 }
@@ -712,12 +732,16 @@ class ItemBottomNarbar extends StatelessWidget {
   final double totalPrice;
   final VoidCallback onAddToCartPressed; // Nuevo
 
-  ItemBottomNarbar({required this.totalPrice, required this.onAddToCartPressed}); // Actualizado
+  ItemBottomNarbar(
+      {required this.totalPrice,
+      required this.onAddToCartPressed}); // Actualizado
 
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
+      color: Color.fromARGB(255, 47, 60, 79),
       child: Container(
+        
         padding: EdgeInsets.symmetric(horizontal: 20),
         height: 70,
         child: Row(
@@ -725,7 +749,7 @@ class ItemBottomNarbar extends StatelessWidget {
           children: [
             Text(
               "Total:",
-              style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 255, 178, 63)),
             ),
             SizedBox(
               width: 15,
@@ -735,14 +759,14 @@ class ItemBottomNarbar extends StatelessWidget {
               style: TextStyle(
                 fontSize: 19,
                 fontWeight: FontWeight.bold,
-                color: Colors.red,
+                color: Color.fromARGB(255, 255, 178, 63),
               ),
             ),
             ElevatedButton(
               onPressed: onAddToCartPressed, // Cambiado
               style: ButtonStyle(
                 backgroundColor: MaterialStateColor.resolveWith(
-                  (states) => Colors.red,
+                  (states) => Color.fromARGB(255, 255, 178, 63),
                 ),
                 padding: MaterialStateProperty.all(
                   EdgeInsets.symmetric(
@@ -761,13 +785,13 @@ class ItemBottomNarbar extends StatelessWidget {
                 children: [
                   Icon(
                     CupertinoIcons.cart_fill_badge_plus,
-                    color: Colors.white,
+                    color: Color.fromARGB(255, 55, 66, 103),
                   ),
                   SizedBox(width: 10), // Espacio entre el icono y el texto
                   Text(
-                    "Add Cart",
+                    "Añadir carrito",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Color.fromARGB(255, 55, 66, 103),
                     ),
                   ),
                 ],
@@ -779,5 +803,3 @@ class ItemBottomNarbar extends StatelessWidget {
     );
   }
 }
-
-

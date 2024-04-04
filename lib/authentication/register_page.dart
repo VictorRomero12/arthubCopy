@@ -284,7 +284,7 @@ class __FormContentState extends State<_FormContent> {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) => LoginPage()),
+                    MaterialPageRoute(builder: (context) => LoginPageModal()),
                   );
                 },
                 child: const Text('Aceptar'),
