@@ -142,7 +142,7 @@ class ProfilePage1 extends StatelessWidget {
                             // Redirigir al usuario a la pantalla de inicio de sesión
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => LoginPageModal()),
+                              MaterialPageRoute(builder: (context) => LoginPage()),
                             );
                           },
                           style: ElevatedButton.styleFrom(

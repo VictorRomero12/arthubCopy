@@ -2,8 +2,10 @@ import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.da
 import 'package:arthub/Cart/cart_page.dart';
 import 'package:arthub/Cart/order_page.dart';
 import 'package:arthub/Home/Images_prueba.dart';
-import 'package:arthub/Home/Widgets/Page_like.dart';
+
 import 'package:arthub/Home/apiprueba.dart' as ApiPageFile;
+import 'package:arthub/Like/page_favorities.dart';
+import 'package:arthub/authentication/login_page.dart';
 import 'package:arthub/profile/ProfilePrueba.dart';
 import 'package:arthub/profile/profileNew.dart';
 import 'package:arthub/profile/profile_page.dart';
@@ -19,7 +21,8 @@ class SimpleBottomNavigation extends StatefulWidget {
   final String username;
   final String password;
   final int idUsuario;
-  final bool isLoggedIn; // Variable para verificar si el usuario ha iniciado sesión
+  final bool
+      isLoggedIn; // Variable para verificar si el usuario ha iniciado sesión
 
   const SimpleBottomNavigation({
     Key? key,
@@ -54,7 +57,7 @@ class _SimpleBottomNavigationState extends State<SimpleBottomNavigation> {
         printType: 'Tipo de impresión',
         size: 'Tamaño',
       ),
-      PageLike(),
+      FavoritesPage(userId: widget.idUsuario),
       ProfilePage3(
         username: widget.username,
         password: widget.password,
@@ -67,20 +70,19 @@ class _SimpleBottomNavigationState extends State<SimpleBottomNavigation> {
         children: _pages,
       ),
       bottomNavigationBar: AnimatedBottomNavigationBar(
-        icons: [
+        backgroundColor: const Color.fromARGB(255, 47, 60, 79),
+        icons: const [
           CupertinoIcons.home,
           CupertinoIcons.cart,
           CupertinoIcons.heart,
           CupertinoIcons.person,
         ],
         activeIndex: pageIndex,
-        inactiveColor: Colors.black.withOpacity(0.5),
-        activeColor: Colors.blue,
+        inactiveColor: const Color.fromARGB(255, 255, 255, 255),
+        activeColor: const Color.fromARGB(255, 255, 178, 63),
         gapLocation: GapLocation.none,
         notchSmoothness: NotchSmoothness.softEdge,
-        leftCornerRadius: 10,
         iconSize: 25,
-        rightCornerRadius: 10,
         elevation: 0,
         onTap: (index) {
           if (userLoggedIn) {
@@ -93,17 +95,25 @@ class _SimpleBottomNavigationState extends State<SimpleBottomNavigation> {
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
-                  title: Text('Error'),
-                  content: Text('Debes iniciar sesión para acceder aquí.'),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text('Cerrar'),
-                    ),
-                  ],
-                );
+  backgroundColor: Color.fromARGB(255, 255, 255, 255), // Cambia el color de fondo a blanco
+  title: Row(
+    children: [
+      Text('Advertencia'),
+      SizedBox(width: 20),
+      Icon(CupertinoIcons.exclamationmark_triangle_fill),
+    ],
+  ),
+  content: const Text('Debes iniciar sesión para acceder aquí.'),
+  actions: <Widget>[
+    TextButton(
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+      child: const Text('Cerrar', style: TextStyle(color: Colors.black),),
+    ),
+  ],
+);
+
               },
             );
           }

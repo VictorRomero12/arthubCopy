@@ -1,3 +1,4 @@
+import 'package:arthub/Pay/methodPay.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -198,6 +199,10 @@ class _OrderPageState extends State<OrderPage> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
+    //               Navigator.push(
+    //   context,
+    //   MaterialPageRoute(builder: (context) => MethodPay()),
+    // );
                   // Lógica para procesar el pago
                   // Aquí puedes agregar la navegación a la página de pago o la lógica correspondiente
                 },

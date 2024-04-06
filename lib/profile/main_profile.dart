@@ -141,7 +141,7 @@ class ProfilePage1 extends StatelessWidget {
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => LoginPageModal()),
+                                      builder: (context) => LoginPage()),
                                 );
                               },
                               style: ElevatedButton.styleFrom(

@@ -108,22 +108,21 @@ class _ApiDetailPageState extends State<ApiDetailPage3> {
   }
 
   void _updateSelectedFrame(String newFrame) {
-  setState(() {
-    selectedFrame = newFrame;
+    setState(() {
+      selectedFrame = newFrame;
 
-    // Actualizar la imagen del marco según la opción seleccionada
-    if (newFrame == 'Madera - \$10') {
-      frameImage = 'assets/madera1.png';
-    } else if (newFrame == 'Metal -\$15') {
-      frameImage = 'assets/metal1.png'; // Corregir extensión de imagen
-    } else if (newFrame == 'Aluminio - \$20') {
-      frameImage = 'assets/aluminio1jpg.jpg';
-    } else {
-      frameImage = ''; // Otra lógica si es necesario
-    }
-  });
-}
-
+      // Actualizar la imagen del marco según la opción seleccionada
+      if (newFrame == 'Madera - \$10') {
+        frameImage = 'assets/madera1.png';
+      } else if (newFrame == 'Metal - \$15') {
+        frameImage = 'assets/metalbueno.jpg'; // Corregir extensión de imagen
+      } else if (newFrame == 'Aluminio - \$20') {
+        frameImage = 'assets/aluminio2.jpg';
+      } else {
+        frameImage = ''; // Otra lógica si es necesario
+      }
+    });
+  }
 
   void _updateSelectedPrintType(String newPrintType) {
     setState(() {
@@ -351,17 +350,31 @@ class _ApiDetailPageState extends State<ApiDetailPage3> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 180,
-                height: 180,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  image: DecorationImage(
-                    image: NetworkImage(item['imageUrl'] ?? ''),
-                    fit: BoxFit
-                        .contain, // Usar BoxFit.contain para mostrar la imagen completa
+              // Widget Stack para colocar la imagen principal y el marco (si aplica)
+              Stack(
+                children: [
+                  // Verificación de marco: si es "Poster", mostrar solo la imagen principal
+                  if (item['frameImage'] != null &&
+                      item['frameImage'].isNotEmpty)
+                    Positioned.fill(
+                      child: Image.asset(
+                        item['frameImage'],
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  // Imagen principal superpuesta al marco (o sola si es "Poster")
+                  Container(
+                    width: 180,
+                    height: 180,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      image: DecorationImage(
+                        image: NetworkImage(item['imageUrl'] ?? ''),
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
               Expanded(
                 child: Padding(
@@ -369,7 +382,7 @@ class _ApiDetailPageState extends State<ApiDetailPage3> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+                     children: [
                       Text(
                         '${item['name'] ?? ''}',
                         style: const TextStyle(
@@ -451,7 +464,9 @@ class _ApiDetailPageState extends State<ApiDetailPage3> {
     // Verificar si el producto ya está en el carrito
     bool isAlreadyInCart = cartModel.items.any((cartItem) =>
         cartItem['name'] == item['name'] &&
-        cartItem['0imageUrl'] == item['imageUrl']);
+        cartItem['imageUrl'] == item['imageUrl'] &&
+        cartItem['frameType'] == item['frameType'] &&
+        cartItem['printType'] == item['printType']);
 
     if (isAlreadyInCart) {
       showDialog(
@@ -473,12 +488,12 @@ class _ApiDetailPageState extends State<ApiDetailPage3> {
         },
       );
     } else {
-      _addToCartConfirmed(
-          item); // Solo agregar si el producto no está en el carrito
+      _addToCartConfirmed(item); // Agregar artículo al carrito
     }
   }
 
   void _addToCartConfirmed(Map<String, dynamic> item) {
+    item['frameImage'] = frameImage; // Agrega la imagen del marco al artículo
     Provider.of<CartModel>(context, listen: false).addItem(item);
 
     setState(() {
@@ -537,6 +552,7 @@ class _ApiDetailPageState extends State<ApiDetailPage3> {
                   fit: BoxFit.cover,
                 ),
               ),
+             
             ),
             const SizedBox(height: 20),
             Row(
@@ -739,23 +755,24 @@ class _ApiDetailPageState extends State<ApiDetailPage3> {
             ),
             const SizedBox(height: 10),
             Container(
-  alignment: Alignment.center,
-  child: ColorFiltered(
-    colorFilter: selectedPrintTypeColor,
-    child: Image.network(widget.imageUrl),
-  ),
-  height: MediaQuery.of(context).size.height * 0.4, // 70% del alto de la pantalla
-  width: MediaQuery.of(context).size.width * 0.4, // 70% del ancho de la pantalla
-  decoration: BoxDecoration(
-    image: DecorationImage(
-      image: AssetImage(frameImage),
-      fit: BoxFit.cover, // Puedes probar otros BoxFit según la situación
-      alignment: Alignment.center,
-    ),
-  ),
-),
-
-
+              alignment: Alignment.center,
+              child: ColorFiltered(
+                colorFilter: selectedPrintTypeColor,
+                child: Image.network(widget.imageUrl),
+              ),
+              height: MediaQuery.of(context).size.height *
+                  0.4, // 70% del alto de la pantalla
+              width: MediaQuery.of(context).size.width *
+                  0.4, // 70% del ancho de la pantalla
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(frameImage),
+                  fit: BoxFit
+                      .cover, // Puedes probar otros BoxFit según la situación
+                  alignment: Alignment.center,
+                ),
+              ),
+            ),
             const SizedBox(height: 50),
           ],
         ),

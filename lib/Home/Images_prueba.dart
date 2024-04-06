@@ -2,6 +2,8 @@ import 'package:arthub/Home/NewDetailPage.dart';
 import 'package:arthub/Home/Widgets/DrawerWidget.dart';
 import 'package:arthub/Home/apidetail_prueba.dart';
 import 'package:arthub/Home/otraPrueba.dart';
+import 'package:arthub/authentication/login_page.dart';
+import 'package:arthub/authentication/register_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -12,12 +14,12 @@ class HomePagePrueba extends StatefulWidget {
   final String password;
   final int idUsuario;
 
-  const HomePagePrueba(
-      {Key? key,
-      required this.username,
-      required this.password,
-      required this.idUsuario})
-      : super(key: key);
+  const HomePagePrueba({
+    Key? key,
+    required this.username,
+    required this.password,
+    required this.idUsuario,
+  }) : super(key: key);
 
   @override
   _HomePagePruebaState createState() => _HomePagePruebaState();
@@ -31,7 +33,6 @@ class _HomePagePruebaState extends State<HomePagePrueba> {
   @override
   void initState() {
     super.initState();
-
     _fetchImages();
   }
 
@@ -69,64 +70,110 @@ class _HomePagePruebaState extends State<HomePagePrueba> {
     print('ID del usuario en HomePagePrueba: ${widget.idUsuario}');
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 55, 66, 103),
-      // Coloca aquí el AppBarWidget
-
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await _fetchImages();
-        },
-        child: ListView(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-              child: Container(
-                width: double.infinity,
-                height: 50,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 10,
-                        offset: const Offset(0, 3),
-                      )
-                    ]),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
+      body: Column(
+        children: [
+          if (widget.idUsuario == 0) // Mostrar solo si el ID es 0
+            Container(
+              margin: const EdgeInsets.only(
+                  top: 30), // Espacio arriba de los botones
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              LoginPage(), // Reemplaza LoginPage con el nombre de tu página de inicio de sesión
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Iniciar Sesión',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        CupertinoIcons.search,
-                        color: Colors.red,
-                      ),
-                      Container(
-                        height: 50,
-                        width: 300,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
-                          child: TextFormField(
-                            onChanged: (value) {
-                              _filterImages(value);
-                            },
-                            decoration: const InputDecoration(
-                              hintText: "Search...",
-                              border: InputBorder.none,
-                            ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              RegisterPage(), // Reemplaza LoginPage con el nombre de tu página de inicio de sesión
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Registrarse',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(width: 10), // Espacio entre los botones
+                ],
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+            child: Container(
+              width: double.infinity,
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 2,
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  )
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      CupertinoIcons.search,
+                      color: Colors.red,
+                    ),
+                    Container(
+                      height: 50,
+                      width: 300,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                        child: TextFormField(
+                          onChanged: (value) {
+                            _filterImages(value);
+                          },
+                          decoration: const InputDecoration(
+                            hintText: "Search...",
+                            border: InputBorder.none,
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
-            ApiPage(images: _allImages, idUsuario: widget.idUsuario),
-          ],
-        ),
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                await _fetchImages();
+              },
+              child: ListView(
+                children: [
+                  ApiPage(images: _allImages, idUsuario: widget.idUsuario),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

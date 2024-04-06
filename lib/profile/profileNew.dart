@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:arthub/Home/Images_prueba.dart';
+import 'package:arthub/Home/home_page.dart';
 import 'package:arthub/authentication/login_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -93,6 +95,7 @@ class ProfilePage1 extends StatelessWidget {
   final Map<String, dynamic> profileData;
 
   const ProfilePage1({Key? key, required this.profileData}) : super(key: key);
+  
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +105,9 @@ class ProfilePage1 extends StatelessWidget {
     String userName = profileData['username'];
     String email = profileData['email'];
     int edad = profileData['edad'];
+    late String _email='';
+  late String _password='';
+  late int _idUsuario=0;
 
     return Scaffold(
       body: Column(
@@ -321,8 +327,8 @@ class ProfilePage1 extends StatelessWidget {
                         // Redirigir al usuario a la pantalla de inicio de sesión
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) => LoginPageModal()),
-                        );
+                          MaterialPageRoute(builder: (context) => SimpleBottomNavigation(username: _email, password: _password, idUsuario: _idUsuario, isLoggedIn: false,),
+                        ));
                       },
                       style: ElevatedButton.styleFrom(
                         primary: Colors.red,

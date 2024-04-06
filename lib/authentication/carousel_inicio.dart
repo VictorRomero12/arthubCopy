@@ -196,7 +196,7 @@ class _MyAppState extends State<CarouselInicio> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => const LoginPageModal()),
+                                      builder: (context) => const LoginPage()),
                                 );
                               },
                               style: ElevatedButton.styleFrom(

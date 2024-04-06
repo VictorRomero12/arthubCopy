@@ -477,6 +477,44 @@ class _ApiDetailPageState extends State<ApiDetailPage2> {
                   fit: BoxFit.cover,
                 ),
               ),
+              // child: SafeArea(
+              //               child: Padding(
+              //                 padding: const EdgeInsets.symmetric(horizontal: 18),
+              //                 child: Column(
+              //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //                   crossAxisAlignment: CrossAxisAlignment.end,
+              //                   children: [
+              //                     Row(
+              //                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //                       children: [
+              //                         InkWell(
+              //                           onTap: () => Navigator.pop(context),
+              //                           child: CircleAvatar(
+              //                             backgroundColor: Colors.black.withOpacity(0.2),
+              //                             child: const Icon(
+              //                               Icons.chevron_left,
+              //                               color: Colors.white,
+              //                               size: 28,
+              //                             ),
+              //                           ),
+              //                         ),
+              //                         InkWell(
+              //                           onTap: _openAuthorProfile,
+              //                           child: CircleAvatar(
+              //                             backgroundColor: Colors.black.withOpacity(0.2),
+              //                             child: const Icon(
+              //                               Icons.person,
+              //                               color: Colors.white,
+              //                               size: 28,
+              //                             ),
+              //                           ),
+              //                         ),
+              //                       ],
+              //                     ),
+              //                   ],
+              //                 ),
+              //               ),
+              //             ),
             ),
             const SizedBox(height: 20),
             Row(
